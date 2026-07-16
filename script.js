@@ -66,7 +66,10 @@ function initMain() {
 
         if (nodeIndex >= textNodes.length) {
           clearInterval(timer);
-          configBlock.classList.remove('mobile-typing');
+          setTimeout(() => {
+            textNodes.forEach(item => { item.node.nodeValue = ''; });
+            typeConfig();
+          }, 1800);
         }
       }, 22);
     };
