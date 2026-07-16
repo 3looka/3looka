@@ -171,9 +171,13 @@ function initBackground() {
 }
 
 function initTerminal() {
-  if (window.innerWidth <= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const body = document.getElementById('terminal-body');
   if (!body) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    body.textContent = 'ali@portfolio:~$ python welcome.py\n> Compiling...\n> Rendering output...\n\n[ OUTPUT ]\nWELCOME';
+    return;
+  }
 
   const ASCII = [
 `__        __   _                          
