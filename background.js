@@ -1,6 +1,6 @@
 function initBackground() {
   const canvas = document.getElementById('bg-canvas');
-  if (!canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!canvas || window.innerWidth <= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const ctx    = canvas.getContext('2d');
   if (!ctx) return;
 
@@ -171,7 +171,7 @@ function initBackground() {
 }
 
 function initTerminal() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.innerWidth <= 768 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const body = document.getElementById('terminal-body');
   if (!body) return;
 
