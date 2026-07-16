@@ -37,6 +37,50 @@ function initMain() {
     else setTimeout(() => typeText(typingEl, text), 400);
   }
 
+  // Type the config card only on mobile while preserving its syntax colors.
+  const configBlock = document.querySelector('.about-card .code-block');
+  if (configBlock && window.innerWidth <= 768 && !reduceMotion) {
+    const textNodes = [];
+    const walker = document.createTreeWalker(configBlock, NodeFilter.SHOW_TEXT);
+    let node;
+
+    while ((node = walker.nextNode())) {
+      textNodes.push({ node, text: node.nodeValue });
+      node.nodeValue = '';
+    }
+
+    const typeConfig = () => {
+      configBlock.classList.add('mobile-typing');
+      let nodeIndex = 0;
+      let charIndex = 0;
+
+      const timer = setInterval(() => {
+        const current = textNodes[nodeIndex];
+        current.node.nodeValue += current.text[charIndex];
+        charIndex++;
+
+        if (charIndex >= current.text.length) {
+          nodeIndex++;
+          charIndex = 0;
+        }
+
+        if (nodeIndex >= textNodes.length) {
+          clearInterval(timer);
+          configBlock.classList.remove('mobile-typing');
+        }
+      }, 22);
+    };
+
+    const configObserver = new IntersectionObserver((entries) => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        configObserver.disconnect();
+        typeConfig();
+      }
+    }, { threshold: 0.35 });
+
+    configObserver.observe(configBlock);
+  }
+
   // ── COUNTER ANIMATION ─────────────────────────
   function animateCount(el, target, duration = 1500) {
     let start     = 0;
