@@ -1,6 +1,8 @@
 function initBackground() {
   const canvas = document.getElementById('bg-canvas');
+  if (!canvas || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const ctx    = canvas.getContext('2d');
+  if (!ctx) return;
 
   let W, H, animId;
   let particles = [];
@@ -145,6 +147,11 @@ function initBackground() {
     animId = requestAnimationFrame(loop);
   }
 
+  function handleVisibility() {
+    cancelAnimationFrame(animId);
+    if (!document.hidden) loop();
+  }
+
   function init() {
     resize();
     initParticles();
@@ -158,11 +165,13 @@ function initBackground() {
     initParticles();
     loop();
   });
+  document.addEventListener('visibilitychange', handleVisibility);
 
   init();
 }
 
 function initTerminal() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const body = document.getElementById('terminal-body');
   if (!body) return;
 

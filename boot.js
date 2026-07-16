@@ -20,6 +20,20 @@ function runBoot() {
   const bootBar    = document.getElementById('boot-bar');
   const bootStatus = document.getElementById('boot-status');
 
+  if (!bootScreen || !bootLines || !bootBar || !bootStatus) {
+    if (typeof initMain === 'function') initMain();
+    return;
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    bootScreen.style.display = 'none';
+    document.getElementById('bg-canvas')?.classList.add('visible');
+    document.getElementById('status-bar')?.classList.add('visible');
+    document.getElementById('navbar')?.classList.add('visible');
+    if (typeof initMain === 'function') initMain();
+    return;
+  }
+
   document.body.classList.add('booting');
 
   BOOT_LINES.forEach((line, i) => {
@@ -34,10 +48,10 @@ function runBoot() {
       bootStatus.textContent = progress < 100
         ? `LOADING... ${progress}%`
         : 'SYSTEM READY';
-    }, line.delay);
+    }, line.delay * 0.35);
   });
 
-  const totalTime = BOOT_LINES[BOOT_LINES.length - 1].delay + 600;
+  const totalTime = (BOOT_LINES[BOOT_LINES.length - 1].delay * 0.35) + 350;
 
   setTimeout(() => {
     bootScreen.classList.add('hide');

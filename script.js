@@ -1,5 +1,7 @@
 function initMain() {
 
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // ── CLOCK ─────────────────────────────────────
   function updateClock() {
     const el = document.getElementById('status-time');
@@ -31,7 +33,8 @@ function initMain() {
   const typingEl = document.querySelector('.typing-target');
   if (typingEl) {
     const text = typingEl.dataset.text || '';
-    setTimeout(() => typeText(typingEl, text), 400);
+    if (reduceMotion) typingEl.textContent = text;
+    else setTimeout(() => typeText(typingEl, text), 400);
   }
 
   // ── COUNTER ANIMATION ─────────────────────────
@@ -51,7 +54,8 @@ function initMain() {
 
   document.querySelectorAll('.stat-num').forEach(el => {
     const target = parseInt(el.dataset.count, 10);
-    setTimeout(() => animateCount(el, target), 600);
+    if (reduceMotion) el.textContent = target;
+    else setTimeout(() => animateCount(el, target), 600);
   });
 
   // ── REVEAL ON SCROLL ──────────────────────────
@@ -69,21 +73,6 @@ function initMain() {
   });
 
   // ── STACK BARS ON SCROLL ──────────────────────
-  const stackObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.querySelectorAll('.stack-fill').forEach(bar => {
-          const w = bar.dataset.width || 0;
-          setTimeout(() => { bar.style.width = w + '%'; }, 200);
-        });
-        stackObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2 });
-
-  const stackSection = document.getElementById('stack');
-  if (stackSection) stackObserver.observe(stackSection);
-
   // ── ACTIVE NAV ON SCROLL ──────────────────────
   const sections = document.querySelectorAll('.module');
   const navLinks = document.querySelectorAll('.nav-link');
@@ -93,7 +82,10 @@ function initMain() {
       if (entry.isIntersecting) {
         const id = entry.target.id;
         navLinks.forEach(link => {
-          link.classList.toggle('active', link.dataset.section === id);
+          const isActive = link.dataset.section === id;
+          link.classList.toggle('active', isActive);
+          if (isActive) link.setAttribute('aria-current', 'page');
+          else link.removeAttribute('aria-current');
         });
       }
     });
@@ -102,7 +94,7 @@ function initMain() {
   sections.forEach(s => navObserver.observe(s));
 
   // ── MAGNETIC BUTTONS ──────────────────────────
-  document.querySelectorAll('.magnetic').forEach(el => {
+  if (!reduceMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) document.querySelectorAll('.magnetic').forEach(el => {
     el.addEventListener('mousemove', e => {
       const rect = el.getBoundingClientRect();
       const cx   = rect.left + rect.width  / 2;
@@ -121,7 +113,10 @@ function initMain() {
     link.addEventListener('click', e => {
       e.preventDefault();
       const target = document.querySelector(link.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      if (target) {
+        target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+        history.pushState(null, '', link.getAttribute('href'));
+      }
     });
   });
 
@@ -136,6 +131,8 @@ function initMain() {
   });
 
   // ── CURSOR GLOW ───────────────────────────────
+  if (reduceMotion || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
   const glow = document.createElement('div');
   glow.style.cssText = `
     position: fixed;
